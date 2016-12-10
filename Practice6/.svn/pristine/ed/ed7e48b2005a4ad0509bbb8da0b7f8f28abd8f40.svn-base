@@ -1,0 +1,70 @@
+package ua.nure.piontkovskyi.Practice6.part7;
+
+
+import java.util.Iterator;
+
+public class Range implements Iterable {
+
+    private final boolean reverse;
+    private int[] arr;
+
+    public Range(int m, int n, boolean reverse) {
+        this.reverse = reverse;
+        if (n < m) {
+            System.out.println("Illegal input!");
+            return;
+        }
+        arr = new int[n - m + 1];
+        int tmp = m;
+        if (reverse) {
+            tmp = n;
+        }
+        for (int i = 0; i < arr.length; i++) {
+            if (reverse) {
+                arr[i] = tmp--;
+            } else {
+                arr[i] = tmp++;
+            }
+        }
+    }
+
+    public void printArray() {
+        Iterator it = iterator();
+        while (it.hasNext()) {
+            System.out.print(it.next() + " ");
+        }
+    }
+
+    @Override
+    public Iterator iterator() {
+        return new RangeIterator();
+    }
+
+    private class RangeIterator implements Iterator {
+
+        private int index;
+
+        public RangeIterator() {
+            index = -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (index + 1 < arr.length) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public Object next() {
+            index++;
+            return arr[index];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+}
