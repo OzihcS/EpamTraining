@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<st3:Deposits xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns:st3="http://nure.ua/piontkovskyi/summaryTask3/bankDeposits"
+              xsi:schemaLocation="http://nure.ua/piontkovskyi/summaryTask3/bankDeposits input.xsd">
+
+    <Bank>
+        <Name>Some bank in USA</Name>
+        <Country>USA</Country>
+        <Type>posteRestante</Type>
+        <Depositor>John Simth</Depositor>
+        <AccountId>4149445678961236</AccountId>
+        <AmountOnDeposit>7535.9</AmountOnDeposit>
+        <Profitability>5</Profitability>
+        <TimeConstraints>3</TimeConstraints>
+    </Bank>
+
+    <Bank>
+        <Name>Some bank in Germany</Name>
+        <Country>German</Country>
+        <Type>savings</Type>
+        <Depositor>Martin Lock</Depositor>
+        <AccountId>4149654991296349</AccountId>
+        <AmountOnDeposit>10535.9</AmountOnDeposit>
+        <Profitability>10</Profitability>
+        <TimeConstraints>1</TimeConstraints>
+    </Bank>
+
+    <Bank>
+        <Name>Some bank in Poland</Name>
+        <Country>Poland</Country>
+        <Type>savings</Type>
+        <Depositor>Jakub Korolewski</Depositor>
+        <AccountId>4149895375648542</AccountId>
+        <AmountOnDeposit>6335.9</AmountOnDeposit>
+        <Profitability>7.5</Profitability>
+        <TimeConstraints>2</TimeConstraints>
+    </Bank>
+</st3:Deposits>

@@ -1,0 +1,123 @@
+package ua.nure.piontkovskyi.SummaryTask3.parsers;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.stream.StreamSource;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+import ua.nure.piontkovskyi.SummaryTask3.util.XML;
+import ua.nure.piontkovskyi.SummaryTask3.entity.Bank;
+import ua.nure.piontkovskyi.SummaryTask3.entity.Deposits;
+import ua.nure.piontkovskyi.SummaryTask3.entity.Type;
+
+import java.io.IOException;
+
+/**
+ * StAX parser
+ */
+
+public class MyStAXParser extends DefaultHandler {
+
+    private String xmlFileName;
+    private Deposits deposits;
+
+    public Deposits getDeposits() {
+        return deposits;
+    }
+
+    public MyStAXParser(String xmlFileName) {
+        this.xmlFileName = xmlFileName;
+    }
+
+    /**
+     * Parses XML document with StAX. There is no validation during the parsing.
+     *
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public void parse() throws ParserConfigurationException, SAXException, IOException, XMLStreamException {
+        Bank bank = null;
+        String currentElement = null;
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+        XMLEventReader reader = factory.createXMLEventReader(new StreamSource(
+                xmlFileName));
+        while (reader.hasNext()) {
+            XMLEvent event = reader.nextEvent();
+            if (event.isCharacters() && event.asCharacters().isWhiteSpace()) {
+                continue;
+            }
+            if (event.isStartElement()) {
+                StartElement startElement = event.asStartElement();
+                currentElement = startElement.getName().getLocalPart();
+                if (XML.DEPOSITS.isEqual(currentElement)) {
+                    deposits = new Deposits();
+                    continue;
+                }
+                if (XML.BANK.isEqual(currentElement)) {
+                    bank = new Bank();
+                    continue;
+                }
+            }
+
+            if (event.isCharacters()) {
+                Characters characters = event.asCharacters();
+
+                if (XML.NAME.isEqual(currentElement)) {
+                    bank.setName(characters.getData());
+                    continue;
+                }
+
+                if (XML.COUNTRY.isEqual(currentElement)) {
+                    bank.setCountry(characters.getData());
+                    continue;
+                }
+                if (XML.DEPOSITOR.isEqual(currentElement)) {
+                    bank.setDepositorName(characters.getData());
+                    continue;
+                }
+
+                if (XML.TYPE.isEqual(currentElement)) {
+                    bank.setType(Type.getTypeByName(characters.getData()));
+                    continue;
+                }
+                if (XML.ACCOUNT_ID.isEqual(currentElement)) {
+                    bank.setAccountId(Long.parseLong(characters.getData()));
+                    continue;
+                }
+                if (XML.AMOUNT_ON_DEPOSIT.isEqual(currentElement)) {
+                    bank.setAmountOnDeposit(Double.parseDouble(characters.getData()));
+                    continue;
+                }
+                if (XML.PROFITABILITY.isEqual(currentElement)) {
+                    bank.setProfitability(Double.parseDouble(characters.getData()));
+                    continue;
+                }
+                if (XML.TIME_CONSTRAINTS.isEqual(currentElement)) {
+                    bank.setTimeConstraint(Integer.parseInt(characters.getData()));
+                    continue;
+                }
+            }
+
+            if (event.isEndElement()) {
+                EndElement endElement = event.asEndElement();
+                String localName = endElement.getName().getLocalPart();
+
+                if (XML.BANK.isEqual(localName)) {
+                    deposits.add(bank);
+                    continue;
+                }
+            }
+        }
+        reader.close();
+    }
+}

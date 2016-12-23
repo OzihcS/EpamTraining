@@ -1,0 +1,33 @@
+package ua.nure.piontkovskyi.SummaryTask3.entity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Root Element in XML
+ */
+public class Deposits {
+
+    private List<Bank> deposits;
+
+    public Deposits() {
+        deposits = new ArrayList();
+    }
+
+    public void add(Bank bank) {
+        deposits.add(bank);
+    }
+
+    public List<Bank> getList() {
+        return deposits;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Bank b : deposits) {
+            sb.append(b).append(System.lineSeparator());
+        }
+        return sb.toString();
+    }
+}

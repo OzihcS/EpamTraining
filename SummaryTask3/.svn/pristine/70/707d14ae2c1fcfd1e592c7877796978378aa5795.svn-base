@@ -1,0 +1,195 @@
+package ua.nure.piontkovskyi.SummaryTask3.parsers;
+
+import java.io.File;
+import java.io.IOException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
+import ua.nure.piontkovskyi.SummaryTask3.util.XML;
+import ua.nure.piontkovskyi.SummaryTask3.entity.Bank;
+import ua.nure.piontkovskyi.SummaryTask3.entity.Deposits;
+import ua.nure.piontkovskyi.SummaryTask3.entity.Type;
+
+
+/**
+ * DOM parser
+ */
+public class MyDOMParser {
+
+    private String xmlFileName;
+    private Deposits deposits;
+
+    public MyDOMParser(String xmlFileName) {
+        this.xmlFileName = xmlFileName;
+    }
+
+    public Deposits getDeposits() {
+        return deposits;
+    }
+
+    /**
+     * Parses XML document
+     * @param validate
+     *                if true validate XML document against its XML schema
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public void parse(boolean validate) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        if (validate) {
+            dbf.setFeature("http://xml.org/sax/features/validation", true);
+            dbf.setFeature("http://apache.org/xml/features/validation/schema", true);
+        }
+
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        db.setErrorHandler(new DefaultHandler() {
+            @Override
+            public void error(SAXParseException ex) throws SAXException {
+                throw ex;
+            }
+        });
+        Document document = db.parse(xmlFileName);
+        Element root = document.getDocumentElement();
+        deposits = new Deposits();
+        NodeList bankNodes = root.getElementsByTagName(XML.BANK.getValue());
+        for (int j = 0; j < bankNodes.getLength(); j++) {
+            Bank bank = getBank(bankNodes.item(j));
+            deposits.add(bank);
+        }
+    }
+
+
+    /**
+     * Extracts Bank object from the XML node
+     * @param item Bank node
+     * @return object Bank from current XML node
+     */
+    private Bank getBank(Node item) {
+        Bank bank = new Bank();
+        Element bankElement = (Element) item;
+
+        Node name = bankElement.getElementsByTagName(XML.NAME.getValue()).item(0);
+        bank.setName(name.getTextContent());
+
+        Node country = bankElement.getElementsByTagName(XML.COUNTRY.getValue()).item(0);
+        bank.setCountry(country.getTextContent());
+
+        Node type = bankElement.getElementsByTagName(XML.TYPE.getValue()).item(0);
+        bank.setType(Type.getTypeByName(type.getTextContent()));
+
+        Node depositorName = bankElement.getElementsByTagName(XML.DEPOSITOR.getValue()).item(0);
+        bank.setDepositorName(depositorName.getTextContent());
+
+        Node accountId = bankElement.getElementsByTagName(XML.ACCOUNT_ID.getValue()).item(0);
+        bank.setAccountId(Long.valueOf(accountId.getTextContent()));
+
+        Node amountOnDeposit = bankElement.getElementsByTagName(XML.AMOUNT_ON_DEPOSIT.getValue()).item(0);
+        bank.setAmountOnDeposit(Double.valueOf(amountOnDeposit.getTextContent()));
+
+        Node profitability = bankElement.getElementsByTagName(XML.PROFITABILITY.getValue()).item(0);
+        bank.setProfitability(Double.valueOf(profitability.getTextContent()));
+
+        Node timeConstraint = bankElement.getElementsByTagName(XML.TIME_CONSTRAINTS.getValue()).item(0);
+        bank.setTimeConstraint(Integer.valueOf(timeConstraint.getTextContent()));
+        return bank;
+    }
+
+    /**
+     * Create and return DOM of the deposits container
+     * @param deposits Deposits object
+     * @throws ParserConfigurationException
+     */
+    public static Document getDocument(Deposits deposits)
+            throws ParserConfigurationException {
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document document = db.newDocument();
+        Element dElement = document.createElement(XML.DEPOSITS.getValue());
+        document.appendChild(dElement);
+
+        for (Bank bank : deposits.getList()) {
+            Element bankElement = document.createElement(XML.BANK.getValue());
+            dElement.appendChild(bankElement);
+
+            Element nameElement = document.createElement(XML.NAME.getValue());
+            nameElement.setTextContent(bank.getName());
+            bankElement.appendChild(nameElement);
+
+            Element country = document.createElement(XML.COUNTRY.getValue());
+            country.setTextContent(bank.getCountry());
+            bankElement.appendChild(country);
+
+
+            Element type = document.createElement(XML.TYPE.getValue());
+            type.setTextContent(String.valueOf(bank.getType().getValue()));
+            bankElement.appendChild(type);
+
+            Element depositor = document.createElement(XML.DEPOSITOR.getValue());
+            depositor.setTextContent(bank.getDepositorName());
+            bankElement.appendChild(depositor);
+
+            Element accountId = document.createElement(XML.ACCOUNT_ID.getValue());
+            accountId.setTextContent(String.valueOf(bank.getAccountId()));
+            bankElement.appendChild(accountId);
+
+            Element amount = document.createElement(XML.AMOUNT_ON_DEPOSIT.getValue());
+            amount.setTextContent(String.valueOf(bank.getAmountOnDeposit()));
+            bankElement.appendChild(amount);
+
+            Element profitability = document.createElement(XML.PROFITABILITY.getValue());
+            profitability.setTextContent(String.valueOf(bank.getProfitability()));
+            bankElement.appendChild(profitability);
+
+            Element timeConstraints = document.createElement(XML.TIME_CONSTRAINTS.getValue());
+            timeConstraints.setTextContent(String.valueOf(bank.getTimeConstraint()));
+            bankElement.appendChild(timeConstraints);
+
+        }
+        return document;
+    }
+
+    /**
+     * Save deposits list to XML file
+     * @param deposits list to be saved
+     * @param xmlFileName output XML file
+     * @throws ParserConfigurationException
+     * @throws TransformerException
+     */
+    public static void saveToXML(Deposits deposits, String xmlFileName)
+            throws ParserConfigurationException, TransformerException {
+        saveToXML(getDocument(deposits), xmlFileName);
+    }
+
+    /**
+     * Save DOM to XML.
+     * @param document DOM to be saved.
+     * @param xmlFileName Output XML file name.
+     */
+    public static void saveToXML(Document document, String xmlFileName)
+            throws TransformerException {
+        StreamResult result = new StreamResult(new File(xmlFileName));
+        TransformerFactory tf = TransformerFactory.newInstance();
+        javax.xml.transform.Transformer t = tf.newTransformer();
+        t.setOutputProperty(OutputKeys.INDENT, "yes");
+        t.transform(new DOMSource(document), result);
+    }
+
+}
