@@ -1,0 +1,33 @@
+body {
+    background: lightgrey;
+    font-size: 15pt;
+    font-family: Arial, Verdana;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 5px;
+}
+
+a {
+    margin: 10px;
+}
+
+p {
+    color: darkred;
+}
+
+select {
+    background: floralwhite;
+    margin: auto;
+    font-family: Arial, Verdana;
+    margin-left: 5px;
+}
+
+input {
+    background: floralwhite;
+    margin: auto;
+    font-family: Arial, Verdana;
+    margin-left: 5px;
+}
+
